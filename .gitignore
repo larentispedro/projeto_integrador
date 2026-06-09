@@ -1,0 +1,16 @@
+# Dependências
+node_modules/
+
+# Variáveis de ambiente (senhas, etc)
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build do React
+/front/build
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
