@@ -10,30 +10,16 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- TABELAS
 -- ============================================================
 
-CREATE TABLE IF NOT EXISTS profissional (
-    id                    UUID         DEFAULT gen_random_uuid() PRIMARY KEY,
-    nome_completo         VARCHAR(50)  NOT NULL,
-    cpf                   CHAR(11)     NOT NULL UNIQUE,
-    tipo_profissional     VARCHAR(30)  NOT NULL,
-    registro_profissional VARCHAR(30)
-);
-
-CREATE TABLE IF NOT EXISTS paciente (
-    id                  UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
-    paciente_id_externo UUID        NOT NULL UNIQUE,
-    nome_paciente       VARCHAR(50) NOT NULL,
-    cpf                 CHAR(11)    NOT NULL UNIQUE,
-    status              VARCHAR(20) NOT NULL
-);
-
+-- id_paciente e id_profissional são referências externas (gerenciadas
+-- por outros grupos do trabalho integrador), por isso não há FK aqui.
 CREATE TABLE IF NOT EXISTS consulta_remota (
-    id              UUID         DEFAULT gen_random_uuid() PRIMARY KEY,
-    id_paciente     UUID         NOT NULL REFERENCES paciente(id),
-    id_profissional UUID         NOT NULL REFERENCES profissional(id),
-    data_hora       TIMESTAMP    NOT NULL,
-    canal           VARCHAR(20)  NOT NULL,
-    motivo          VARCHAR(300) NOT NULL,
-    status          VARCHAR(20)  NOT NULL DEFAULT 'AGENDADA'
+    id              UUID          DEFAULT gen_random_uuid() PRIMARY KEY,
+    id_paciente     VARCHAR(100)  NOT NULL,
+    id_profissional VARCHAR(100)  NOT NULL,
+    data_hora       TIMESTAMP     NOT NULL,
+    canal           VARCHAR(20)   NOT NULL,
+    motivo          VARCHAR(300)  NOT NULL,
+    status          VARCHAR(20)   NOT NULL DEFAULT 'AGENDADA'
 );
 
 CREATE TABLE IF NOT EXISTS registro_clinico (
