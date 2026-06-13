@@ -6,9 +6,7 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 
--- ============================================================
 -- TABELAS
--- ============================================================
 
 -- id_paciente e id_profissional são referências externas (gerenciadas
 -- por outros grupos do trabalho integrador), por isso não há FK aqui.

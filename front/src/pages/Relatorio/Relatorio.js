@@ -43,7 +43,6 @@ function Relatorio() {
               <i className="bi bi-bar-chart-line me-2" />
               Relatório de Consultas
             </h4>
-            <small className="text-muted">Gerado pela view vw_consultas_detalhadas</small>
           </div>
           <span className="badge bg-secondary fs-6">{dados.length} registros</span>
         </div>

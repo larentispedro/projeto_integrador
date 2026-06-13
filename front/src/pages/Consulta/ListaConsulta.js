@@ -71,6 +71,7 @@ function ListaConsulta() {
               <tr>
                 <th className="ps-4">Data/Hora</th>
                 <th>Paciente (ID)</th>
+                <th>Profissional (ID)</th>
                 <th>Canal</th>
                 <th>Motivo</th>
                 <th>Status</th>
@@ -80,7 +81,7 @@ function ListaConsulta() {
             <tbody>
               {consultas.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center text-muted py-4">
+                  <td colSpan="7" className="text-center text-muted py-4">
                     Nenhuma consulta encontrada.
                   </td>
                 </tr>
@@ -89,6 +90,7 @@ function ListaConsulta() {
                   <tr key={c.id}>
                     <td className="ps-4">{formatarData(c.dataHora)}</td>
                     <td className="text-monospace small">{c.idPaciente}</td>
+                    <td className="text-monospace small">{c.idProfissional}</td>
                     <td className="text-capitalize">{c.canal}</td>
                     <td>{c.motivo}</td>
                     <td>
