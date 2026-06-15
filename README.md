@@ -170,16 +170,17 @@ POST /api/telemedicina/consultas/:id/registro-clinico
 GET /api/telemedicina/consultas/:id/historico
 ```
 
-Busca os dados da consulta e consulta o módulo G5 (Prontuário) pelo `idPaciente`.
+Busca os dados da consulta e consulta o módulo G5 (Prontuário, `GET /prontuario/paciente/:idPaciente` na porta 3005) pelo `idPaciente`.
 
 **Resposta `200`:**
 ```json
 {
   "dadosConsulta": { /* dados da consulta */ },
-  "prontuarioPaciente": [ /* registros do G5 */ ]
+  "prontuarioPaciente": { "prontuario": { /* ... */ }, "registros": [ /* registros do G5 */ ] }
 }
 ```
 
+Se o paciente não tiver prontuário no G5, `prontuarioPaciente` retorna `{ "aviso": "Paciente sem prontuário registrado no módulo G5." }`.
 Se o G5 estiver indisponível, `prontuarioPaciente` retorna `{ "aviso": "Módulo G5 indisponível no momento." }` em vez de erro.
 
 ---

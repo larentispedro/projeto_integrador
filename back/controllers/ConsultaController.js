@@ -155,10 +155,14 @@ async function consultarComProntuario(req, res) {
     let historicoProntuario = [];
 
     try {
-      const respostaG5 = await axios.get(`http://localhost:3005/api/prontuario/${consulta.idPaciente}`);
+      const respostaG5 = await axios.get(`http://localhost:3005/prontuario/paciente/${consulta.idPaciente}`);
       historicoProntuario = respostaG5.data;
     } catch (err) {
-      historicoProntuario = { aviso: "Módulo G5 indisponível no momento." };
+      if (err.response?.status === 404) {
+        historicoProntuario = { aviso: "Paciente sem prontuário registrado no módulo G5." };
+      } else {
+        historicoProntuario = { aviso: "Módulo G5 indisponível no momento." };
+      }
     }
 
     return res.json({

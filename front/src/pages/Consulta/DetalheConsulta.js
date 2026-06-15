@@ -26,6 +26,18 @@ const BTN_STATUS = {
   CANCELADA:    'btn-danger',
 };
 
+const TIPO_REGISTRO_LABEL = {
+  ANAMNESE:         'Anamnese',
+  EVOLUCAO_MEDICA:  'Evolução Médica',
+  RETORNO:          'Retorno',
+};
+
+const TIPO_REGISTRO_BADGE = {
+  ANAMNESE:         'bg-info text-dark',
+  EVOLUCAO_MEDICA:  'bg-primary',
+  RETORNO:          'bg-success',
+};
+
 function DetalheConsulta() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -348,18 +360,58 @@ function DetalheConsulta() {
                   {historico.aviso}
                 </div>
               )}
-              {historico && Array.isArray(historico) && historico.length === 0 && (
-                <p className="text-muted mb-0">Nenhum registro de prontuário encontrado para este paciente.</p>
-              )}
-              {historico && Array.isArray(historico) && historico.length > 0 && (
-                <div className="list-group list-group-flush">
-                  {historico.map((item, i) => (
-                    <div key={i} className="list-group-item px-0">
-                      <pre className="mb-0 small text-muted" style={{ whiteSpace: 'pre-wrap' }}>
-                        {JSON.stringify(item, null, 2)}
-                      </pre>
-                    </div>
-                  ))}
+              {historico && !historico.aviso && (
+                <div>
+                  <p className="text-muted small mb-3">
+                    Prontuário aberto em {formatarData(historico.prontuario.data_criacao)}
+                  </p>
+                  {historico.registros.length === 0 ? (
+                    <p className="text-muted mb-0">Nenhum registro clínico encontrado para este paciente.</p>
+                  ) : (
+                    historico.registros.map((item, i) => (
+                      <div key={i} className="card border mb-3">
+                        <div className="card-body p-3">
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <span className={`badge ${TIPO_REGISTRO_BADGE[item.tipo_registro] || 'bg-secondary'}`}>
+                              {TIPO_REGISTRO_LABEL[item.tipo_registro] || item.tipo_registro}
+                            </span>
+                            <small className="text-muted">{item.data_registro}</small>
+                          </div>
+
+                          {item.diagnostico && (
+                            <div className="mb-2">
+                              <div className="fw-bold small text-uppercase text-muted">Diagnóstico</div>
+                              <div>{item.diagnostico}</div>
+                            </div>
+                          )}
+
+                          {item.sintomas && (
+                            <div className="mb-2">
+                              <div className="fw-bold small text-uppercase text-muted">Sintomas</div>
+                              <div style={{ whiteSpace: 'pre-line' }}>{item.sintomas}</div>
+                            </div>
+                          )}
+
+                          {item.observacoes && (
+                            <div className="mb-2">
+                              <div className="fw-bold small text-uppercase text-muted">Observações</div>
+                              <div style={{ whiteSpace: 'pre-line' }}>{item.observacoes}</div>
+                            </div>
+                          )}
+
+                          {item.retificado && (
+                            <div className="alert alert-warning small mt-2 mb-0">
+                              <i className="bi bi-pencil-square me-1" />
+                              <strong>Retificado em {item.data_retificacao}</strong> — {item.motivo_retificacao}
+                              <div className="mt-1" style={{ whiteSpace: 'pre-line' }}>
+                                <strong>Novo conteúdo:</strong> {item.conteudo_novo?.trim()}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               )}
             </div>
