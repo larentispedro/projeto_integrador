@@ -65,7 +65,7 @@ function FormConsulta() {
                     value={form.idPaciente}
                     onChange={handleChange}
                     required
-                    placeholder="UUID do paciente"
+                    placeholder="Identificador do paciente"
                   />
                 </div>
 
@@ -78,7 +78,7 @@ function FormConsulta() {
                     value={form.idProfissional}
                     onChange={handleChange}
                     required
-                    placeholder="UUID do profissional de saúde"
+                    placeholder="Identificador do profissional de saúde"
                   />
                 </div>
 
