@@ -1,17 +1,10 @@
--- ============================================================
--- G12 Telemedicina — Script SQL (BD1)
--- Banco: g12_telemedicina
--- ============================================================
-
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
-
 -- TABELAS
 
 -- id_paciente e id_profissional são referências externas (gerenciadas
 -- por outros grupos do trabalho integrador), por isso não há FK aqui.
+
 CREATE TABLE IF NOT EXISTS consulta_remota (
-    id              UUID          DEFAULT gen_random_uuid() PRIMARY KEY,
+    id              SERIAL        PRIMARY KEY,
     id_paciente     VARCHAR(100)  NOT NULL,
     id_profissional VARCHAR(100)  NOT NULL,
     data_hora       TIMESTAMP     NOT NULL,
@@ -21,8 +14,8 @@ CREATE TABLE IF NOT EXISTS consulta_remota (
 );
 
 CREATE TABLE IF NOT EXISTS registro_clinico (
-    id          UUID         DEFAULT gen_random_uuid() PRIMARY KEY,
-    id_consulta UUID         NOT NULL REFERENCES consulta_remota(id),
+    id          SERIAL       PRIMARY KEY,
+    id_consulta INTEGER      NOT NULL REFERENCES consulta_remota(id),
     diagnostico VARCHAR(500) NOT NULL,
     sintomas    VARCHAR(500),
     observacoes VARCHAR(500),
@@ -32,8 +25,8 @@ CREATE TABLE IF NOT EXISTS registro_clinico (
 
 -- Terceira tabela: histórico de mudanças de status (alimentada pela Trigger)
 CREATE TABLE IF NOT EXISTS log_status_consulta (
-    id              UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
-    consulta_id     UUID        NOT NULL REFERENCES consulta_remota(id),
+    id              SERIAL      PRIMARY KEY,
+    consulta_id     INTEGER     NOT NULL REFERENCES consulta_remota(id),
     status_anterior VARCHAR(20),
     status_novo     VARCHAR(20) NOT NULL,
     alterado_em     TIMESTAMP   DEFAULT NOW()
@@ -41,12 +34,12 @@ CREATE TABLE IF NOT EXISTS log_status_consulta (
 
 
 -- ============================================================
--- STORED PROCEDURE (FUNCTION) — sp_atualizar_status
+-- STORED PROCEDURE — sp_atualizar_status
 -- Valida se a consulta pode ter o status alterado e faz o UPDATE.
 -- Usada pelo endpoint PATCH /api/telemedicina/consultas/:id/status.
 -- ============================================================
 
-CREATE OR REPLACE FUNCTION sp_atualizar_status(id_consulta UUID, novo_status VARCHAR)
+CREATE OR REPLACE FUNCTION sp_atualizar_status(id_consulta INTEGER, novo_status VARCHAR)
 RETURNS void
 LANGUAGE plpgsql AS $$
 DECLARE
@@ -132,3 +125,6 @@ SELECT
     r.finalizado
 FROM consulta_remota c
 LEFT JOIN registro_clinico r ON r.id_consulta = c.id;
+
+
+select * from log_status_consulta

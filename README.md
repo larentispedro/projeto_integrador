@@ -32,8 +32,6 @@ diagrama.pgerd          diagrama físico do banco
 | Consome | G5 — Prontuário | Consulta do histórico clínico do paciente durante o atendimento |
 | Fornece | G10 — Faturamento | Dados do atendimento finalizado para geração de cobranças |
 
-> **Observação**: a integração com G1 (Pacientes) e a autenticação via JWT, previstas inicialmente na concepção do projeto, não foram implementadas nesta versão — ver seção de divergências do documento de Engenharia de Software para detalhes e motivos.
-
 ## Como Rodar Localmente
 
 ### Pré-requisitos
@@ -197,7 +195,7 @@ Endpoint consumido pelo módulo **G10 — Faturamento**. Disponível apenas para
 **Resposta `200`:**
 ```json
 {
-  "consultaId": "uuid",
+  "consultaId": 1,
   "pacienteId": "string",
   "profissionalId": "string",
   "dataAtendimento": "2026-06-20T14:00:00.000Z",
@@ -221,7 +219,7 @@ Retorna os dados da view `vw_consultas_detalhadas` (consulta + registro clínico
 **Resposta `200`:** array de objetos:
 ```json
 {
-  "consulta_id": "uuid",
+  "consulta_id": 1,
   "paciente_id": "string",
   "profissional_id": "string",
   "data_hora": "2026-06-20T14:00:00.000Z",
@@ -240,4 +238,4 @@ Retorna os dados da view `vw_consultas_detalhadas` (consulta + registro clínico
 |---|---|---|
 | Emily Cardoso | | |
 | Isadora Costa | | |
-| Pedro Maldaner | | |
+| Pedro Maldaner | pedro.augusto@unoesc.edu.br | larentispedro |

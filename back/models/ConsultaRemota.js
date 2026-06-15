@@ -3,8 +3,8 @@ import banco from "../banco.js";
 
 const ConsultaRemota = banco.define("ConsultaRemota", {
   id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
     primaryKey: true,
   },
   idPaciente: {

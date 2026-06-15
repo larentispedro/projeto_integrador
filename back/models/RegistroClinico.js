@@ -3,8 +3,8 @@ import banco from "../banco.js";
 
 const RegistroClinico = banco.define("RegistroClinico", {
   id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
     primaryKey: true,
   },
   diagnostico: {
