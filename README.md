@@ -237,6 +237,6 @@ Retorna os dados da view `vw_consultas_detalhadas` (consulta + registro clínico
 
 | Nome | E-mail | GitHub |
 |---|---|---|
-| Emily Cardoso | | |
-| Isadora Costa | | |
+| Emily Cardoso | emilyfragoso@outlook.com.br | emily-squena |
+| Isadora Costa | isadora.c412@gmail.com | iss |
 | Pedro Maldaner | pedro.augusto@unoesc.edu.br | larentispedro |

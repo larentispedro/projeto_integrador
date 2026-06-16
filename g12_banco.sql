@@ -125,6 +125,3 @@ SELECT
     r.finalizado
 FROM consulta_remota c
 LEFT JOIN registro_clinico r ON r.id_consulta = c.id;
-
-
-select * from log_status_consulta
