@@ -6,8 +6,6 @@
 
 </div>
 
----
-
 ## Sobre o Módulo
 
 O módulo **G12 — Telemedicina** é responsável pelo ciclo de vida completo dos **atendimentos médicos realizados de forma remota** dentro do ecossistema *Sistema de Saúde Integrado*.
