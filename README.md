@@ -59,7 +59,6 @@ O sistema permite registrar consultas remotas, acompanhar seu andamento, registr
 | Variáveis de Ambiente | dotenv | ^17.4.2 |
 | HTTP Client | Axios | ^1.17.0 |
 | CORS | cors | ^2.8.6 |
-| Dev | Nodemon | ^3.1.14 |
 
 ---
 
