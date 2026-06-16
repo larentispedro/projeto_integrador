@@ -252,7 +252,7 @@ projeto_integrador-main/
 
 | Nome | E-mail | GitHub |
 |---|---|---|
-| Emily Cardoso | emilyfragoso@outlook.com.br | emily-squena |
+| Emily Fragoso | emilyfragoso@outlook.com.br | emily-squena |
 | Isadora Costa | isadora.c412@gmail.com | iss |
 | Pedro Maldaner | pedro.augusto@unoesc.edu.br | larentispedro |
 
