@@ -1,237 +1,255 @@
-# G12 — Telemedicina
+<div align="center">
 
-Módulo de Telemedicina do **Sistema de Saúde Integrado** — Projeto Integrador 2026 (Sistemas de Informação).
+# 📹 G12 — Telemedicina
+### Sistema de Saúde Integrado · Projeto Integrador 2026
+#### Curso de Sistemas de Informação — Unoesc Chapecó
 
-Responsável pelo ciclo de vida dos atendimentos remotos: registro de consultas, gerenciamento de status, registro clínico digital, consulta de histórico do paciente e fornecimento de dados para faturamento.
+</div>
+
+---
+
+## Sobre o Módulo
+
+O módulo **G12 — Telemedicina** é responsável pelo ciclo de vida completo dos **atendimentos médicos realizados de forma remota** dentro do ecossistema *Sistema de Saúde Integrado*.
+
+O sistema permite registrar consultas remotas, acompanhar seu andamento, registrar o diagnóstico clínico digital e fornecer os dados necessários para o faturamento — tudo integrado aos demais módulos do ecossistema via API REST.
+
+---
+
+## Arquitetura e Integrações
+
+```
+┌─────────────────────────────────────────────────────┐
+│                  G12 — Telemedicina                 │
+│                                                     │
+│   React (Front-end)  ←→  Node.js/Express (API)     │
+│                               ↕                     │
+│                         PostgreSQL                  │
+└──────────┬────────────────────┬─────────────────────┘
+           │                    │
+     CONSOME                 FORNECE
+           │                    │
+  ┌────────▼──────┐    ┌────────▼───────┐
+  │ G1 — Pacientes│    │G10 — Faturamento│
+  │  (validação)  │    │   (cobranças)  │
+  └───────────────┘    └────────────────┘
+           │
+  ┌────────▼───────┐
+  │ G5 — Prontuário│
+  │  (histórico)   │
+  └────────────────┘
+```
+
+| Tipo | Módulo | Finalidade |
+|------|--------|------------|
+|  Consome | **G1 — Pacientes** | Valida existência e status do paciente antes de registrar a consulta |
+|  Consome | **G5 — Prontuário** | Consulta histórico clínico durante o atendimento remoto |
+|  Fornece | **G10 — Faturamento** | Dados do atendimento finalizado para geração de cobranças |
+
+---
 
 ## Stack Tecnológica
 
-- **Back-end**: Node.js + Express (ES Modules)
-- **Front-end**: React (Create React App) + Bootstrap 5
-- **ORM**: Sequelize
-- **Banco de dados**: PostgreSQL
-- **Versionamento**: Git + GitHub
+| Camada | Tecnologia | Versão |
+|--------|-----------|--------|
+| Back-end | Node.js + Express | Express ^5.2.1 |
+| Front-end | React + React Router | — |
+| Banco de Dados | PostgreSQL | — |
+| ORM | Sequelize | ^6.37.8 |
+| Variáveis de Ambiente | dotenv | ^17.4.2 |
+| HTTP Client | Axios | ^1.17.0 |
+| CORS | cors | ^2.8.6 |
+| Dev | Nodemon | ^3.1.14 |
 
-## Estrutura do Repositório
-
-```
-back/                  API REST (porta 3001)
-  controllers/
-  models/
-  banco.js             configuração da conexão com o PostgreSQL
-  index.js             rotas e inicialização do servidor
-front/                  Interface React (porta 3000)
-g12_banco.sql           script de criação do banco (tabelas, view, function, triggers)
-diagrama.pgerd          diagrama físico do banco
-```
-
-## Integrações com Outros Módulos
-
-| Tipo | Módulo | Finalidade |
-|---|---|---|
-| Consome | G5 — Prontuário | Consulta do histórico clínico do paciente durante o atendimento |
-| Fornece | G10 — Faturamento | Dados do atendimento finalizado para geração de cobranças |
+---
 
 ## Como Rodar Localmente
 
 ### Pré-requisitos
 
-- Node.js 18+
-- PostgreSQL 14+ em execução local
+- [Node.js](https://nodejs.org/) instalado
+- [PostgreSQL](https://www.postgresql.org/) rodando localmente
+- Módulos G1 (porta padrão) e G5 (porta 3005) disponíveis para integração
 
-### 1. Banco de dados
+### 1. Clone o repositório
 
-Crie o banco `g12_telemedicina` no PostgreSQL e execute o script `g12_banco.sql` (raiz do repositório). Ele cria as tabelas, a view, a stored procedure e as triggers utilizadas pelo sistema.
+```bash
+git clone https://github.com/larentispedro/projeto_integrador
+cd projeto_integrador-main
+```
 
-Ajuste o usuário/senha/porta de conexão em `back/banco.js` caso sejam diferentes do seu ambiente.
-
-### 2. Back-end (porta 3001)
+### 2. Instale as dependências do back-end
 
 ```bash
 cd back
 npm install
+```
+
+### 3. Configure o banco de dados
+
+Abra o arquivo `g12_banco.sql` no seu cliente PostgreSQL (psql ou pgAdmin) e execute o script completo. Ele irá criar:
+
+- Tabelas: `consulta_remota`, `registro_clinico`, `log_status_consulta`
+- Stored procedure: `sp_atualizar_status`
+- Triggers: `trg_log_status`, `fn_bloquear_edicao`
+- View: `vw_consultas_detalhadas`
+
+```bash
+# Via linha de comando:
+psql -U postgres -d g12_telemedicina -f g12_banco.sql
+```
+
+### 4. Configure as variáveis de ambiente
+
+Dentro da pasta `back/`, copie o arquivo de exemplo e preencha com suas credenciais:
+
+```bash
+cp .env.example .env
+```
+
+Abra o `.env` e preencha com os dados do seu PostgreSQL local:
+
+```env
+DB_NOME=g12_telemedicina
+DB_USUARIO=postgres
+DB_SENHA=sua_senha_aqui
+DB_HOST=localhost
+DB_PORTA=5432
+```
+
+> ⚠️ O arquivo `.env` **não deve ser commitado** no repositório. Certifique-se de que ele está listado no `.gitignore`.
+
+### 5. Inicie o servidor
+
+```bash
+# Produção
 node index.js
 ```
 
-> Durante o desenvolvimento, é possível usar `npx nodemon index.js` para reiniciar o servidor automaticamente a cada alteração.
+A API estará disponível em: **http://localhost:3001**
 
-### 3. Front-end (porta 3000)
+### 6. Inicie o front-end
 
 ```bash
-cd front
+cd ../front
 npm install
 npm start
 ```
 
-A interface ficará disponível em `http://localhost:3000` e consome a API em `http://localhost:3001`.
+O front-end estará disponível em: **http://localhost:3000**
+
+---
 
 ## Endpoints da API
 
 Base URL: `http://localhost:3001`
 
-Todos os endpoints recebem e retornam `application/json`.
+### Consultas Remotas
 
-### Criar consulta remota
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `POST` | `/api/telemedicina/consultas` | Registrar nova consulta remota |
+| `GET` | `/api/telemedicina/consultas` | Listar consultas (filtros por `status`, `idPaciente`, `idProfissional`) |
+| `GET` | `/api/telemedicina/consultas/:id` | Detalhar consulta (inclui registro clínico) |
+| `PATCH` | `/api/telemedicina/consultas/:id/status` | Atualizar status da consulta |
 
-```
-POST /api/telemedicina/consultas
-```
+### Registro Clínico
 
-**Body:**
-```json
-{
-  "idPaciente": "string",
-  "idProfissional": "string",
-  "dataHora": "2026-06-20T14:00:00Z",
-  "canal": "video | audio | chat",
-  "motivo": "string"
-}
-```
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `POST` | `/api/telemedicina/consultas/:id/registro-clinico` | Criar ou atualizar registro clínico digital |
 
-**Resposta `201`:** objeto da consulta criada, com `status: "AGENDADA"` e `id` gerado.
-**Resposta `400`:** `{ "erro": "..." }` em caso de campos obrigatórios ausentes/inválidos.
+### Integrações
 
----
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `GET` | `/api/telemedicina/consultas/:id/historico` | Consultar histórico clínico via G5 |
+| `GET` | `/api/telemedicina/consultas/:id/faturamento` | Obter payload de faturamento para G10 |
 
-### Listar consultas
+### Relatório
 
-```
-GET /api/telemedicina/consultas
-```
-
-**Query params (opcionais):**
-- `status` — `AGENDADA | EM_ANDAMENTO | FINALIZADA | CANCELADA`
-- `idPaciente`
-- `idProfissional`
-
-**Resposta `200`:** array de consultas, ordenadas por `dataHora` decrescente.
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `GET` | `/api/telemedicina/relatorio` | Relatório consolidado via view `vw_consultas_detalhadas` |
 
 ---
 
-### Detalhar consulta
+## Ciclo de Vida da Consulta
 
 ```
-GET /api/telemedicina/consultas/:id
+AGENDADA ──→ EM_ANDAMENTO ──→ FINALIZADA
+    │
+    └──→ CANCELADA
 ```
 
-**Resposta `200`:** dados da consulta, incluindo `registroClinico` (objeto ou `null`).
-**Resposta `404`:** `{ "erro": "Consulta não encontrada" }`
+> ⚠️ Transições inválidas retornam **HTTP 422**. Status `FINALIZADA` e `CANCELADA` são imutáveis.
 
 ---
 
-### Atualizar status da consulta
+## Estrutura do Banco de Dados
 
 ```
-PATCH /api/telemedicina/consultas/:id/status
+consulta_remota
+├── id (SERIAL PK)
+├── id_paciente
+├── id_profissional
+├── data_hora
+├── canal
+├── motivo
+└── status (AGENDADA | EM_ANDAMENTO | FINALIZADA | CANCELADA)
+
+registro_clinico
+├── id (SERIAL PK)
+├── id_consulta (FK → consulta_remota)
+├── diagnostico
+├── sintomas
+├── observacoes
+├── orientacoes
+└── finalizado (boolean)
+
+log_status_consulta
+├── id (SERIAL PK)
+├── consulta_id (FK)
+├── status_anterior
+├── status_novo
+└── alterado_em
 ```
-
-**Body:**
-```json
-{ "status": "EM_ANDAMENTO" }
-```
-
-**Transições permitidas:**
-- `AGENDADA → EM_ANDAMENTO`
-- `AGENDADA → CANCELADA`
-- `EM_ANDAMENTO → FINALIZADA`
-
-**Resposta `200`:** consulta atualizada.
-**Resposta `422`:** `{ "erro": "Transição inválida: ..." }`
-**Resposta `404`:** consulta não encontrada.
 
 ---
 
-### Registrar/atualizar registro clínico
+## Estrutura do Projeto
 
 ```
-POST /api/telemedicina/consultas/:id/registro-clinico
+projeto_integrador-main/
+├── back/
+│   ├── controllers/
+│   │   └── ConsultaController.js   # Lógica de negócio e rotas
+│   ├── models/
+│   │   ├── ConsultaRemota.js       # Model Sequelize
+│   │   └── RegistroClinico.js      # Model Sequelize
+│   ├── banco.js                    # Configuração Sequelize + dotenv
+│   ├── index.js                    # Entry point + rotas Express
+│   ├── .env.example                # Modelo de variáveis de ambiente
+│   ├── .env                        # Suas credenciais locais (não commitar)
+│   └── package.json
+├── front/
+│   └── src/
+│       ├── pages/
+│       │   ├── Consulta/
+│       │   │   ├── ListaConsulta.js
+│       │   │   ├── FormConsulta.js
+│       │   │   └── DetalheConsulta.js
+│       │   └── Relatorio/
+│       │       └── Relatorio.js
+│       ├── componentes/
+│       │   └── Menu.js
+│       ├── servicos/
+│       │   └── api.js              # Axios config (baseURL: localhost:3001)
+│       └── App.js
+└── g12_banco.sql                   # Schema completo do banco
 ```
-
-**Body:**
-```json
-{
-  "diagnostico": "string (obrigatório)",
-  "sintomas": "string",
-  "observacoes": "string",
-  "orientacoes": "string",
-  "finalizado": false
-}
-```
-
-- Se a consulta ainda não tem registro clínico, cria um novo (`201`).
-- Se já existe e ainda não foi finalizado, atualiza (`200`).
-- Se já existe e `finalizado: true`, retorna `403` — registros finalizados são imutáveis.
 
 ---
-
-### Histórico do paciente (integração G5)
-
-```
-GET /api/telemedicina/consultas/:id/historico
-```
-
-Busca os dados da consulta e consulta o módulo G5 (Prontuário, `GET /prontuario/paciente/:idPaciente` na porta 3005) pelo `idPaciente`.
-
-**Resposta `200`:**
-```json
-{
-  "dadosConsulta": { /* dados da consulta */ },
-  "prontuarioPaciente": { "prontuario": { /* ... */ }, "registros": [ /* registros do G5 */ ] }
-}
-```
-
-Se o paciente não tiver prontuário no G5, `prontuarioPaciente` retorna `{ "aviso": "Paciente sem prontuário registrado no módulo G5." }`.
-Se o G5 estiver indisponível, `prontuarioPaciente` retorna `{ "aviso": "Módulo G5 indisponível no momento." }` em vez de erro.
-
----
-
-### Dados para faturamento (integração G10)
-
-```
-GET /api/telemedicina/consultas/:id/faturamento
-```
-
-Endpoint consumido pelo módulo **G10 — Faturamento**. Disponível apenas para consultas com `status: "FINALIZADA"`.
-
-**Resposta `200`:**
-```json
-{
-  "consultaId": 1,
-  "pacienteId": "string",
-  "profissionalId": "string",
-  "dataAtendimento": "2026-06-20T14:00:00.000Z",
-  "tipoServico": "TELEMEDICINA"
-}
-```
-
-**Resposta `422`:** `{ "erro": "Faturamento disponível apenas para consultas finalizadas." }`
-**Resposta `404`:** consulta não encontrada.
-
----
-
-### Relatório de consultas
-
-```
-GET /api/telemedicina/relatorio
-```
-
-Retorna os dados da view `vw_consultas_detalhadas` (consulta + registro clínico associado, quando existir).
-
-**Resposta `200`:** array de objetos:
-```json
-{
-  "consulta_id": 1,
-  "paciente_id": "string",
-  "profissional_id": "string",
-  "data_hora": "2026-06-20T14:00:00.000Z",
-  "canal": "video",
-  "motivo": "string",
-  "status": "FINALIZADA",
-  "diagnostico": "string | null",
-  "sintomas": "string | null",
-  "finalizado": true
-}
-```
 
 ## Equipe
 
@@ -240,3 +258,295 @@ Retorna os dados da view `vw_consultas_detalhadas` (consulta + registro clínico
 | Emily Cardoso | emilyfragoso@outlook.com.br | emily-squena |
 | Isadora Costa | isadora.c412@gmail.com | iss |
 | Pedro Maldaner | pedro.augusto@unoesc.edu.br | larentispedro |
+
+---
+
+## Contexto Acadêmico
+
+Projeto desenvolvido como **Projeto Integrador 2026** no Curso de Sistemas de Informação da **Unoesc Chapecó**, integrando as disciplinas:
+
+- **Programação Web** — Implementação full stack (Node.js + React)
+- **Banco de Dados Relacionais** — Modelagem, stored procedures, triggers e views (PostgreSQL)
+- **Engenharia de Software** — Requisitos, UML, processo ágil e qualidade
+
+---
+
+<div align="center">
+  <sub>G12 — Telemedicina · Sistema de Saúde Integrado · 2026</sub>
+</div>
+<div align="center">
+
+# 📹 G12 — Telemedicina
+### Sistema de Saúde Integrado · Projeto Integrador 2026
+#### Curso de Sistemas de Informação — Unoesc Chapecó
+
+</div>
+
+---
+
+## Sobre o Módulo
+
+O módulo **G12 — Telemedicina** é responsável pelo ciclo de vida completo dos **atendimentos médicos realizados de forma remota** dentro do ecossistema *Sistema de Saúde Integrado*.
+
+O sistema permite registrar consultas remotas, acompanhar seu andamento, registrar o diagnóstico clínico digital e fornecer os dados necessários para o faturamento — tudo integrado aos demais módulos do ecossistema via API REST.
+
+---
+
+## Arquitetura e Integrações
+
+```
+┌─────────────────────────────────────────────────────┐
+│                  G12 — Telemedicina                 │
+│                                                     │
+│   React (Front-end)  ←→  Node.js/Express (API)     │
+│                               ↕                     │
+│                         PostgreSQL                  │
+└──────────┬────────────────────┬─────────────────────┘
+           │                    │
+     CONSOME                 FORNECE
+           │                    │
+  ┌────────▼──────┐    ┌────────▼───────┐
+  │ G1 — Pacientes│    │G10 — Faturamento│
+  │  (validação)  │    │   (cobranças)  │
+  └───────────────┘    └────────────────┘
+           │
+  ┌────────▼───────┐
+  │ G5 — Prontuário│
+  │  (histórico)   │
+  └────────────────┘
+```
+
+| Tipo | Módulo | Finalidade |
+|------|--------|------------|
+|  Consome | **G1 — Pacientes** | Valida existência e status do paciente antes de registrar a consulta |
+|  Consome | **G5 — Prontuário** | Consulta histórico clínico durante o atendimento remoto |
+|  Fornece | **G10 — Faturamento** | Dados do atendimento finalizado para geração de cobranças |
+
+---
+
+## Stack Tecnológica
+
+| Camada | Tecnologia | Versão |
+|--------|-----------|--------|
+| Back-end | Node.js + Express | Express ^5.2.1 |
+| Front-end | React + React Router | — |
+| Banco de Dados | PostgreSQL | — |
+| ORM | Sequelize | ^6.37.8 |
+| Variáveis de Ambiente | dotenv | ^17.4.2 |
+| HTTP Client | Axios | ^1.17.0 |
+| CORS | cors | ^2.8.6 |
+| Dev | Nodemon | ^3.1.14 |
+
+---
+
+## Como Rodar Localmente
+
+### Pré-requisitos
+
+- [Node.js](https://nodejs.org/) instalado
+- [PostgreSQL](https://www.postgresql.org/) rodando localmente
+- Módulos G1 (porta padrão) e G5 (porta 3005) disponíveis para integração
+
+### 1. Clone o repositório
+
+```bash
+git clone https://github.com/larentispedro/projeto_integrador
+cd projeto_integrador-main
+```
+
+### 2. Instale as dependências do back-end
+
+```bash
+cd back
+npm install
+```
+
+### 3. Configure o banco de dados
+
+Abra o arquivo `g12_banco.sql` no seu cliente PostgreSQL (psql ou pgAdmin) e execute o script completo. Ele irá criar:
+
+- Tabelas: `consulta_remota`, `registro_clinico`, `log_status_consulta`
+- Stored procedure: `sp_atualizar_status`
+- Triggers: `trg_log_status`, `fn_bloquear_edicao`
+- View: `vw_consultas_detalhadas`
+
+```bash
+# Via linha de comando:
+psql -U postgres -d g12_telemedicina -f g12_banco.sql
+```
+
+### 4. Configure as variáveis de ambiente
+
+Dentro da pasta `back/`, copie o arquivo de exemplo e preencha com suas credenciais:
+
+```bash
+cp .env.example .env
+```
+
+Abra o `.env` e preencha com os dados do seu PostgreSQL local:
+
+```env
+DB_NOME=g12_telemedicina
+DB_USUARIO=postgres
+DB_SENHA=sua_senha_aqui
+DB_HOST=localhost
+DB_PORTA=5432
+```
+
+> ⚠️ O arquivo `.env` **não deve ser commitado** no repositório. Certifique-se de que ele está listado no `.gitignore`.
+
+### 5. Inicie o servidor
+
+```bash
+# Produção
+node index.js
+```
+
+A API estará disponível em: **http://localhost:3001**
+
+### 6. Inicie o front-end
+
+```bash
+cd ../front
+npm install
+npm start
+```
+
+O front-end estará disponível em: **http://localhost:3000**
+
+---
+
+## Endpoints da API
+
+Base URL: `http://localhost:3001`
+
+### Consultas Remotas
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `POST` | `/api/telemedicina/consultas` | Registrar nova consulta remota |
+| `GET` | `/api/telemedicina/consultas` | Listar consultas (filtros por `status`, `idPaciente`, `idProfissional`) |
+| `GET` | `/api/telemedicina/consultas/:id` | Detalhar consulta (inclui registro clínico) |
+| `PATCH` | `/api/telemedicina/consultas/:id/status` | Atualizar status da consulta |
+
+### Registro Clínico
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `POST` | `/api/telemedicina/consultas/:id/registro-clinico` | Criar ou atualizar registro clínico digital |
+
+### Integrações
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `GET` | `/api/telemedicina/consultas/:id/historico` | Consultar histórico clínico via G5 |
+| `GET` | `/api/telemedicina/consultas/:id/faturamento` | Obter payload de faturamento para G10 |
+
+### Relatório
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `GET` | `/api/telemedicina/relatorio` | Relatório consolidado via view `vw_consultas_detalhadas` |
+
+---
+
+## Ciclo de Vida da Consulta
+
+```
+AGENDADA ──→ EM_ANDAMENTO ──→ FINALIZADA
+    │
+    └──→ CANCELADA
+```
+
+> ⚠️ Transições inválidas retornam **HTTP 422**. Status `FINALIZADA` e `CANCELADA` são imutáveis.
+
+---
+
+## Estrutura do Banco de Dados
+
+```
+consulta_remota
+├── id (SERIAL PK)
+├── id_paciente
+├── id_profissional
+├── data_hora
+├── canal
+├── motivo
+└── status (AGENDADA | EM_ANDAMENTO | FINALIZADA | CANCELADA)
+
+registro_clinico
+├── id (SERIAL PK)
+├── id_consulta (FK → consulta_remota)
+├── diagnostico
+├── sintomas
+├── observacoes
+├── orientacoes
+└── finalizado (boolean)
+
+log_status_consulta
+├── id (SERIAL PK)
+├── consulta_id (FK)
+├── status_anterior
+├── status_novo
+└── alterado_em
+```
+
+---
+
+## Estrutura do Projeto
+
+```
+projeto_integrador-main/
+├── back/
+│   ├── controllers/
+│   │   └── ConsultaController.js   # Lógica de negócio e rotas
+│   ├── models/
+│   │   ├── ConsultaRemota.js       # Model Sequelize
+│   │   └── RegistroClinico.js      # Model Sequelize
+│   ├── banco.js                    # Configuração Sequelize + dotenv
+│   ├── index.js                    # Entry point + rotas Express
+│   ├── .env.example                # Modelo de variáveis de ambiente
+│   ├── .env                        # Suas credenciais locais (não commitar)
+│   └── package.json
+├── front/
+│   └── src/
+│       ├── pages/
+│       │   ├── Consulta/
+│       │   │   ├── ListaConsulta.js
+│       │   │   ├── FormConsulta.js
+│       │   │   └── DetalheConsulta.js
+│       │   └── Relatorio/
+│       │       └── Relatorio.js
+│       ├── componentes/
+│       │   └── Menu.js
+│       ├── servicos/
+│       │   └── api.js              # Axios config (baseURL: localhost:3001)
+│       └── App.js
+└── g12_banco.sql                   # Schema completo do banco
+```
+
+---
+
+## Equipe
+
+| Nome | E-mail | GitHub |
+|---|---|---|
+| Emily Cardoso | emilyfragoso@outlook.com.br | emily-squena |
+| Isadora Costa | isadora.c412@gmail.com | iss |
+| Pedro Maldaner | pedro.augusto@unoesc.edu.br | larentispedro |
+
+---
+
+## Contexto Acadêmico
+
+Projeto desenvolvido como **Projeto Integrador 2026** no Curso de Sistemas de Informação da **Unoesc Chapecó**, integrando as disciplinas:
+
+- **Programação Web** — Implementação full stack (Node.js + React)
+- **Banco de Dados Relacionais** — Modelagem, stored procedures, triggers e views (PostgreSQL)
+- **Engenharia de Software** — Requisitos, UML, processo ágil e qualidade
+
+---
+
+<div align="center">
+  <sub>G12 — Telemedicina · Sistema de Saúde Integrado · 2026</sub>
+</div>
