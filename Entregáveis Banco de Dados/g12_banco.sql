@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS consulta_remota (
     canal           VARCHAR(20)   NOT NULL,
     motivo          VARCHAR(300)  NOT NULL,
     status          VARCHAR(20)   NOT NULL DEFAULT 'AGENDADA'
+        CHECK (status IN ('AGENDADA', 'EM_ANDAMENTO', 'FINALIZADA', 'CANCELADA'))
 );
 
 CREATE TABLE IF NOT EXISTS registro_clinico (
@@ -20,7 +21,7 @@ CREATE TABLE IF NOT EXISTS registro_clinico (
     sintomas    VARCHAR(500),
     observacoes VARCHAR(500),
     orientacoes VARCHAR(500),
-    finalizado  BOOLEAN
+    finalizado  BOOLEAN 
 );
 
 -- Terceira tabela: histórico de mudanças de status (alimentada pela Trigger)
@@ -48,6 +49,10 @@ BEGIN
     SELECT status INTO status_atual
     FROM consulta_remota
     WHERE consulta_remota.id = id_consulta;
+
+    IF status_atual IS NULL THEN
+    RAISE EXCEPTION 'Consulta não encontrada';
+    END IF;
 
     IF status_atual = 'FINALIZADA' THEN
         RAISE EXCEPTION 'Consulta já finalizada, não pode ser alterada';
