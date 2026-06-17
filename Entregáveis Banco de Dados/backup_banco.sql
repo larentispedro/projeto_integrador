@@ -2,12 +2,12 @@
 -- PostgreSQL database dump
 --
 
-\restrict tP9IB9lCbZNldbSTgW4iWoqYJE2KTfNuCPWl9BVRqiuIOUdGFzBLy4VwKeMHbOH
+\restrict vCKLPxVq5bfsss3BgeLmLuzeMCy4PcadV4mDVI6yqhY4nPqaXHY7IYRbhuHiMfC
 
 -- Dumped from database version 18.1
 -- Dumped by pg_dump version 18.1
 
--- Started on 2026-06-17 00:40:32
+-- Started on 2026-06-17 20:36:36
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -22,7 +22,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 5 (class 2615 OID 33627)
+-- TOC entry 5 (class 2615 OID 33806)
 -- Name: public; Type: SCHEMA; Schema: -; Owner: -
 --
 
@@ -30,7 +30,7 @@ SET row_security = off;
 
 
 --
--- TOC entry 5047 (class 0 OID 0)
+-- TOC entry 5048 (class 0 OID 0)
 -- Dependencies: 5
 -- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: -
 --
@@ -39,7 +39,7 @@ COMMENT ON SCHEMA public IS '';
 
 
 --
--- TOC entry 238 (class 1255 OID 33679)
+-- TOC entry 238 (class 1255 OID 33859)
 -- Name: fn_bloquear_edicao(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -56,7 +56,7 @@ $$;
 
 
 --
--- TOC entry 239 (class 1255 OID 33681)
+-- TOC entry 239 (class 1255 OID 33861)
 -- Name: fn_log_status(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -74,7 +74,7 @@ $$;
 
 
 --
--- TOC entry 237 (class 1255 OID 33678)
+-- TOC entry 237 (class 1255 OID 33858)
 -- Name: sp_atualizar_status(integer, character varying); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -87,6 +87,10 @@ BEGIN
     SELECT status INTO status_atual
     FROM consulta_remota
     WHERE consulta_remota.id = id_consulta;
+
+    IF status_atual IS NULL THEN
+    RAISE EXCEPTION 'Consulta não encontrada';
+    END IF;
 
     IF status_atual = 'FINALIZADA' THEN
         RAISE EXCEPTION 'Consulta já finalizada, não pode ser alterada';
@@ -108,7 +112,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- TOC entry 220 (class 1259 OID 33629)
+-- TOC entry 220 (class 1259 OID 33808)
 -- Name: consulta_remota; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -119,12 +123,13 @@ CREATE TABLE public.consulta_remota (
     data_hora timestamp without time zone NOT NULL,
     canal character varying(20) NOT NULL,
     motivo character varying(300) NOT NULL,
-    status character varying(20) DEFAULT 'AGENDADA'::character varying NOT NULL
+    status character varying(20) DEFAULT 'AGENDADA'::character varying NOT NULL,
+    CONSTRAINT consulta_remota_status_check CHECK (((status)::text = ANY ((ARRAY['AGENDADA'::character varying, 'EM_ANDAMENTO'::character varying, 'FINALIZADA'::character varying, 'CANCELADA'::character varying])::text[])))
 );
 
 
 --
--- TOC entry 219 (class 1259 OID 33628)
+-- TOC entry 219 (class 1259 OID 33807)
 -- Name: consulta_remota_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -138,7 +143,7 @@ CREATE SEQUENCE public.consulta_remota_id_seq
 
 
 --
--- TOC entry 5048 (class 0 OID 0)
+-- TOC entry 5049 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: consulta_remota_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
@@ -147,7 +152,7 @@ ALTER SEQUENCE public.consulta_remota_id_seq OWNED BY public.consulta_remota.id;
 
 
 --
--- TOC entry 224 (class 1259 OID 33663)
+-- TOC entry 224 (class 1259 OID 33843)
 -- Name: log_status_consulta; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -161,7 +166,7 @@ CREATE TABLE public.log_status_consulta (
 
 
 --
--- TOC entry 223 (class 1259 OID 33662)
+-- TOC entry 223 (class 1259 OID 33842)
 -- Name: log_status_consulta_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -175,7 +180,7 @@ CREATE SEQUENCE public.log_status_consulta_id_seq
 
 
 --
--- TOC entry 5049 (class 0 OID 0)
+-- TOC entry 5050 (class 0 OID 0)
 -- Dependencies: 223
 -- Name: log_status_consulta_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
@@ -184,7 +189,7 @@ ALTER SEQUENCE public.log_status_consulta_id_seq OWNED BY public.log_status_cons
 
 
 --
--- TOC entry 222 (class 1259 OID 33646)
+-- TOC entry 222 (class 1259 OID 33826)
 -- Name: registro_clinico; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -200,7 +205,7 @@ CREATE TABLE public.registro_clinico (
 
 
 --
--- TOC entry 221 (class 1259 OID 33645)
+-- TOC entry 221 (class 1259 OID 33825)
 -- Name: registro_clinico_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -214,7 +219,7 @@ CREATE SEQUENCE public.registro_clinico_id_seq
 
 
 --
--- TOC entry 5050 (class 0 OID 0)
+-- TOC entry 5051 (class 0 OID 0)
 -- Dependencies: 221
 -- Name: registro_clinico_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
@@ -223,7 +228,7 @@ ALTER SEQUENCE public.registro_clinico_id_seq OWNED BY public.registro_clinico.i
 
 
 --
--- TOC entry 225 (class 1259 OID 33683)
+-- TOC entry 225 (class 1259 OID 33863)
 -- Name: vw_consultas_detalhadas; Type: VIEW; Schema: public; Owner: -
 --
 
@@ -243,7 +248,7 @@ CREATE VIEW public.vw_consultas_detalhadas AS
 
 
 --
--- TOC entry 4873 (class 2604 OID 33632)
+-- TOC entry 4873 (class 2604 OID 33811)
 -- Name: consulta_remota id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -251,7 +256,7 @@ ALTER TABLE ONLY public.consulta_remota ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
--- TOC entry 4876 (class 2604 OID 33666)
+-- TOC entry 4876 (class 2604 OID 33846)
 -- Name: log_status_consulta id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -259,7 +264,7 @@ ALTER TABLE ONLY public.log_status_consulta ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
--- TOC entry 4875 (class 2604 OID 33649)
+-- TOC entry 4875 (class 2604 OID 33829)
 -- Name: registro_clinico id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -267,86 +272,73 @@ ALTER TABLE ONLY public.registro_clinico ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
--- TOC entry 5037 (class 0 OID 33629)
+-- TOC entry 5038 (class 0 OID 33808)
 -- Dependencies: 220
 -- Data for Name: consulta_remota; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.consulta_remota (id, id_paciente, id_profissional, data_hora, canal, motivo, status) FROM stdin;
 2	3	2	2026-06-12 14:30:00	audio	Avaliacao de quadro gripal	AGENDADA
+3	7	1	2026-06-13 10:15:00	chat	Renovacao de receita de uso continuo	AGENDADA
 1	15	1	2026-06-10 09:00:00	video	Acompanhamento cardiologico de rotina	FINALIZADA
-4	15	2	2026-06-14 16:00:00	video	Retorno para discussao de exames	CANCELADA
-5	5	3	2026-06-09 11:00:00	video	Consulta nutricional	FINALIZADA
-3	7	1	2026-06-13 10:15:00	chat	Renovacao de receita de uso continuo	FINALIZADA
-6	1	10	2026-06-10 09:00:00	video	Dor de cabeça persistente	AGENDADA
-7	2	10	2026-06-10 10:30:00	audio	Retorno de exame	EM_ANDAMENTO
-8	3	11	2026-06-09 14:00:00	video	Avaliação de pressão alta	FINALIZADA
-9	1	12	2026-06-08 16:00:00	chat	Orientação nutricional	FINALIZADA
-10	2	11	2026-06-11 11:00:00	video	Consulta cancelada	CANCELADA
+4	5	3	2026-06-09 11:00:00	video	Consulta nutricional	FINALIZADA
 \.
 
 
 --
--- TOC entry 5041 (class 0 OID 33663)
+-- TOC entry 5042 (class 0 OID 33843)
 -- Dependencies: 224
 -- Data for Name: log_status_consulta; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.log_status_consulta (id, consulta_id, status_anterior, status_novo, alterado_em) FROM stdin;
-1	1	AGENDADA	EM_ANDAMENTO	2026-06-15 20:18:31.910484
-2	1	EM_ANDAMENTO	FINALIZADA	2026-06-15 20:18:31.910484
-3	3	AGENDADA	EM_ANDAMENTO	2026-06-15 20:18:31.910484
-4	4	AGENDADA	CANCELADA	2026-06-15 20:18:31.910484
-5	5	AGENDADA	EM_ANDAMENTO	2026-06-15 20:18:31.910484
-6	5	EM_ANDAMENTO	FINALIZADA	2026-06-15 20:18:31.910484
-7	3	EM_ANDAMENTO	FINALIZADA	2026-06-15 23:20:13.214285
+1	1	AGENDADA	EM_ANDAMENTO	2026-06-17 20:33:44.086251
+2	1	EM_ANDAMENTO	FINALIZADA	2026-06-17 20:33:44.086251
+3	4	AGENDADA	EM_ANDAMENTO	2026-06-17 20:33:44.086251
+4	4	EM_ANDAMENTO	FINALIZADA	2026-06-17 20:33:44.086251
 \.
 
 
 --
--- TOC entry 5039 (class 0 OID 33646)
+-- TOC entry 5040 (class 0 OID 33826)
 -- Dependencies: 222
 -- Data for Name: registro_clinico; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.registro_clinico (id, id_consulta, diagnostico, sintomas, observacoes, orientacoes, finalizado) FROM stdin;
-1	1	Hipertensao arterial sistemica controlada	Paciente assintomatico, nega dor toracica ou dispneia	PA 125/80 mmHg, FC 72 bpm. Boa adesao ao tratamento	Manter Losartana 50mg/dia. Retorno em 6 meses	t
-3	5	Sobrepeso grau I	Sem queixas no momento	IMC 27. Orientado plano alimentar	Reduzir ultraprocessados, retorno em 60 dias	t
-2	3	Hipotireoidismo em acompanhamento	Refere cansaco leve	Aguardando resultado de TSH para ajuste de dose	Coletar exames antes do retorno	t
-4	3	Hipertensão arterial estágio 1	Dor de cabeça, tontura	Estresse no trabalho	Reduzir sal, retornar em 30 dias	t
-5	4	Sobrepeso	Cansaço	Primeira consulta nutricional	Plano alimentar enviado	t
+1	1	Hipertensao arterial sistemica controlada	Paciente assintomatico	PA 125/80 mmHg	Manter Losartana 50mg/dia	t
 \.
 
 
 --
--- TOC entry 5051 (class 0 OID 0)
+-- TOC entry 5052 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: consulta_remota_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.consulta_remota_id_seq', 10, true);
-
-
---
--- TOC entry 5052 (class 0 OID 0)
--- Dependencies: 223
--- Name: log_status_consulta_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.log_status_consulta_id_seq', 7, true);
+SELECT pg_catalog.setval('public.consulta_remota_id_seq', 4, true);
 
 
 --
 -- TOC entry 5053 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: log_status_consulta_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.log_status_consulta_id_seq', 4, true);
+
+
+--
+-- TOC entry 5054 (class 0 OID 0)
 -- Dependencies: 221
 -- Name: registro_clinico_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.registro_clinico_id_seq', 5, true);
+SELECT pg_catalog.setval('public.registro_clinico_id_seq', 1, true);
 
 
 --
--- TOC entry 4879 (class 2606 OID 33644)
+-- TOC entry 4880 (class 2606 OID 33824)
 -- Name: consulta_remota consulta_remota_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -355,7 +347,7 @@ ALTER TABLE ONLY public.consulta_remota
 
 
 --
--- TOC entry 4883 (class 2606 OID 33672)
+-- TOC entry 4884 (class 2606 OID 33852)
 -- Name: log_status_consulta log_status_consulta_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -364,7 +356,7 @@ ALTER TABLE ONLY public.log_status_consulta
 
 
 --
--- TOC entry 4881 (class 2606 OID 33656)
+-- TOC entry 4882 (class 2606 OID 33836)
 -- Name: registro_clinico registro_clinico_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -373,7 +365,7 @@ ALTER TABLE ONLY public.registro_clinico
 
 
 --
--- TOC entry 4887 (class 2620 OID 33680)
+-- TOC entry 4888 (class 2620 OID 33860)
 -- Name: registro_clinico bloquear_edicao; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -381,7 +373,7 @@ CREATE TRIGGER bloquear_edicao BEFORE UPDATE ON public.registro_clinico FOR EACH
 
 
 --
--- TOC entry 4886 (class 2620 OID 33682)
+-- TOC entry 4887 (class 2620 OID 33862)
 -- Name: consulta_remota trg_log_status; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -389,7 +381,7 @@ CREATE TRIGGER trg_log_status AFTER UPDATE ON public.consulta_remota FOR EACH RO
 
 
 --
--- TOC entry 4885 (class 2606 OID 33673)
+-- TOC entry 4886 (class 2606 OID 33853)
 -- Name: log_status_consulta log_status_consulta_consulta_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -398,7 +390,7 @@ ALTER TABLE ONLY public.log_status_consulta
 
 
 --
--- TOC entry 4884 (class 2606 OID 33657)
+-- TOC entry 4885 (class 2606 OID 33837)
 -- Name: registro_clinico registro_clinico_id_consulta_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -406,11 +398,11 @@ ALTER TABLE ONLY public.registro_clinico
     ADD CONSTRAINT registro_clinico_id_consulta_fkey FOREIGN KEY (id_consulta) REFERENCES public.consulta_remota(id);
 
 
--- Completed on 2026-06-17 00:40:32
+-- Completed on 2026-06-17 20:36:36
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict tP9IB9lCbZNldbSTgW4iWoqYJE2KTfNuCPWl9BVRqiuIOUdGFzBLy4VwKeMHbOH
+\unrestrict vCKLPxVq5bfsss3BgeLmLuzeMCy4PcadV4mDVI6yqhY4nPqaXHY7IYRbhuHiMfC
 
